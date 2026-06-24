@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - Counterfeit Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis Results</h1>
+
+        <div class="result-summary {{ results.summary_class }}">
+            <h2>
+                {% if results.verdict == "counterfeit" %}
+                    COUNTERFEIT DETECTED
+                {% elif results.verdict == "genuine" %}
+                    GENUINE PRODUCT
+                {% elif results.verdict == "reference_required" %}
+                    GENUINE REFERENCE IMAGE REQUIRED
+                {% else %}
+                    MANUAL REVIEW RECOMMENDED
+                {% endif %}
+            </h2>
+            <p class="risk-score">Risk Score: {{ results.risk_score }}/100</p>
+            <p><strong>Decision Basis:</strong> {{ results.decision_reason }}</p>
+            <p><strong>Visual Difference:</strong> {{ "%.2f"|format(results.difference_percent) }}%</p>
+            <p><strong>Similarity Score:</strong> {{ "%.2f"|format(results.similarity_score) }}</p>
+        </div>
+
+        <div class="defects">
+            <h3>Similarity Metrics</h3>
+            <ul>
+                <li>ORB Feature Similarity: {{ "%.2f"|format(results.orb_similarity) }}</li>
+                <li>Edge Similarity: {{ "%.2f"|format(results.edge_similarity) }}</li>
+                <li>Color Similarity: {{ "%.2f"|format(results.color_similarity) }}</li>
+                <li>Hash Similarity: {{ "%.2f"|format(results.hash_similarity_score) }}</li>
+                <li>Object Similarity: {{ "%.2f"|format(results.object_similarity) }}</li>
+            </ul>
+        </div>
+
+        {% if results.characteristic_findings %}
+        <div class="defects">
+            <h3>Product Characteristics Review</h3>
+            <ul>
+                {% for finding in results.characteristic_findings %}
+                <li>{{ finding }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if results.flags %}
+        <div class="flags">
+            <h3>Risk Flags</h3>
+            <ul>
+                {% for flag in results.flags %}
+                <li>{{ flag }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if results.visual_findings %}
+        <div class="defects">
+            <h3>Visual Notes</h3>
+            <ul>
+                {% for defect in results.visual_findings %}
+                <li>{{ defect }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="visualizations">
+            <div class="chart-container">
+                <h3>Similarity Signals</h3>
+                <img src="data:image/png;base64,{{ visualizations.risk_chart }}" alt="Similarity Signals Chart">
+            </div>
+
+            <div class="chart-container">
+                <h3>Reference Image Analysis</h3>
+                <img src="data:image/png;base64,{{ visualizations.original_objects }}" alt="Reference Image Analysis">
+                <p><strong>Blur Score:</strong> {{ "%.2f"|format(results.original_analysis.blur_score) }}</p>
+                <p><strong>Detected Objects:</strong></p>
+                <ul>
+                    {% for obj in results.original_analysis.detected_objects %}
+                    <li>{{ obj.class }} ({{ "%.2f"|format(obj.confidence) }} confidence)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="chart-container">
+                <h3>Uploaded Image Analysis</h3>
+                <img src="data:image/png;base64,{{ visualizations.suspect_objects }}" alt="Uploaded Image Analysis">
+                <p><strong>Blur Score:</strong> {{ "%.2f"|format(results.suspect_analysis.blur_score) }}</p>
+                <p><strong>Detected Objects:</strong></p>
+                <ul>
+                    {% for obj in results.suspect_analysis.detected_objects %}
+                    <li>{{ obj.class }} ({{ "%.2f"|format(obj.confidence) }} confidence)</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Analyze Another Image</a>
+    </div>
+</body>
+</html>

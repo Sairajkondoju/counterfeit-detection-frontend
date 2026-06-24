@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counterfeit Detection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Counterfeit Detection System</h1>
+        <p class="description">
+            Upload a product image and, ideally, a genuine reference image of the same product.
+            The system compares structure, features, colors, and overall visual similarity before
+            deciding whether the result looks genuine, suspicious, or needs manual review.
+        </p>
+        <p class="tip">
+            Best results come from a clean genuine reference image shot from a similar angle and lighting.
+        </p>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('upload_files') }}" method="post" enctype="multipart/form-data" class="upload-form">
+            <div class="form-group">
+                <label for="reference">Upload Genuine Reference Image (recommended):</label>
+                <input type="file" id="reference" name="reference" accept="image/*" class="file-input">
+            </div>
+
+            <div class="form-group">
+                <label for="suspect">Upload Product Image to Check:</label>
+                <input type="file" id="suspect" name="suspect" accept="image/*" required class="file-input">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Analyze Image</button>
+        </form>
+    </div>
+</body>
+</html>
